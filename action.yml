@@ -10,6 +10,10 @@ inputs:
     description: Branch name that contains our patches
     required: false
     default: datadog
+  base_tag:
+    description: Tag used to mark the base
+    required: false
+    default: last-dd-base
 
 runs:
   using: "composite"
@@ -28,29 +32,35 @@ runs:
         git remote add upstream https://github.com/${{ inputs.upstream_repo }}
     - name: Fetch upstream tags
       run: git fetch upstream --tags
-    - name: Get latest tag
-      id: get_latest_tag
+    - name: Get latest tags
+      id: get_latest_tags
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      run:  echo tag=$(gh release list -R ${{ inputs.upstream_repo }} -L 1 | awk '{ print $1 }') >> $GITHUB_OUTPUT
+      run: |
+        echo tag=$(gh release list -R ${{ inputs.upstream_repo }} -L 1 | awk '{ print $1 }') >> $GITHUB_OUTPUT
+        echo previous_tag=$(gh release list -R ${{ inputs.upstream_repo }} -L 2 | tail -n 1 | awk '{ print $1 }') >> $GITHUB_OUTPUT
     - name: Fetch last base
-      run: git fetch origin tag last-dd-base
+      run: |
+        if (!git fetch origin tag ${{ inputs.base_tag }}); then
+          datadog_head=$(git ls-remote --refs origin refs/heads/datadog | awk '{ print $1 }')
+          git tag ${{ inputs.base_tag }} $(git merge-base $datadog_head ${{ steps.get_latest_tags.previous_tag }})
+        fi
     - name: Fetch datadog branch
       run: git fetch origin  ${{ inputs.datadog_branch }}
     - name: Checkout datadog branch
       run: git checkout ${{ inputs.datadog_branch }}
     - name: Rebase datadog branch
-      run: git rebase --onto ${{ steps.get_latest_tag.outputs.tag }} last-dd-base
+      run: git rebase --onto ${{ steps.get_latest_tags.outputs.tag }} ${{ inputs.base_tag }}
     - name: Push datadog branch
       run: git push -f origin ${{ inputs.datadog_branch }}
     - name: Tag release
       run: git tag ${{ steps.get_latest_tag.outputs.tag }}-dd ${{ inputs.datadog_branch }}
     - name: Push tag
-      run: git push origin ${{ steps.get_latest_tag.outputs.tag }}-dd
+      run: git push origin ${{ steps.get_latest_tags.outputs.tag }}-dd
     - name: Move last base tag
-      run: git tag -f last-dd-base ${{ steps.get_latest_tag.outputs.tag }}
+      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tags.outputs.tag }}
     - name: Push last base tag
-      run: git push -f origin last-dd-base
+      run: git push -f origin ${{ inputs.base_tag }}
 
 branding:
   icon: 'package'
