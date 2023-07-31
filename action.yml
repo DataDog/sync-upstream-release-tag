@@ -48,8 +48,8 @@ runs:
     - name: Fetch upstream tags
       shell: bash
       run: git fetch upstream --tags
-    - name: Get latest tags
-      id: get_latest_tags
+    - name: Get latest tag
+      id: get_latest_tag
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
@@ -65,7 +65,7 @@ runs:
       run: git checkout ${{ inputs.datadog_branch }}
     - name: Rebase datadog branch
       shell: bash
-      run: git rebase --onto ${{ steps.get_latest_tags.outputs.tag }} ${{ inputs.base_tag }}
+      run: git rebase --onto ${{ steps.get_latest_tag.outputs.tag }} ${{ inputs.base_tag }}
     - name: Push datadog branch
       shell: bash
       run: git push -f origin ${{ inputs.datadog_branch }}
@@ -74,16 +74,16 @@ runs:
       run: git tag ${{ steps.get_latest_tag.outputs.tag }}-dd ${{ inputs.datadog_branch }}
     - name: Push tag
       shell: bash
-      run: git push origin ${{ steps.get_latest_tags.outputs.tag }}-dd
+      run: git push origin ${{ steps.get_latest_tag.outputs.tag }}-dd
     - name: Move last base tag
       shell: bash
-      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tags.outputs.tag }}
+      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
     - name: Push last base tag
       shell: bash
-      run: git push origin ${{ steps.get_latest_tags.outputs.tag }}-dd
+      run: git push origin ${{ steps.get_latest_tag.outputs.tag }}-dd
     - name: Move last base tag
       shell: bash
-      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tags.outputs.tag }}
+      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
     - name: Push last base tag
       shell: bash
       run: git push -f origin ${{ inputs.base_tag }}
