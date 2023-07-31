@@ -3,6 +3,12 @@ description: Get latest upstream release, rebase on top and push the dd release 
 author: antoine.gaillard@datadoghq.com
 
 inputs:
+  github_actor:
+    description: Github actor
+    required: true
+  github_repository:
+    description: Github repository
+    required: true
   github_token:
     description: Github token
     required: true
@@ -25,6 +31,7 @@ runs:
     - name: Setup git config
       shell: bash
       env:
+        GITHUB_ACTOR: ${{ inputs.github_actor }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         git config user.name "${GITHUB_ACTOR}"
@@ -32,6 +39,9 @@ runs:
         git config --local user.password ${GITHUB_TOKEN}
     - name: Setup remotes
       shell: bash
+      env:
+        GITHUB_ACTOR: ${{ inputs.github_actor }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git remote add upstream https://github.com/${{ inputs.upstream_repo }}
@@ -43,16 +53,10 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      run: |
-        echo tag=$(gh release list -R ${{ inputs.upstream_repo }} -L 1 | awk '{ print $1 }') >> $GITHUB_OUTPUT
-        echo previous_tag=$(gh release list -R ${{ inputs.upstream_repo }} -L 2 | tail -n 1 | awk '{ print $1 }') >> $GITHUB_OUTPUT
+      run:  echo tag=$(gh release list -R kubernetes-sigs/aws-ebs-csi-driver --exclude-drafts --exclude-pre-releases -L 10 | grep -Eo "\bv[0-9]+\.[0-9]+\.[0-9]+\b" | sort -V | tail -n1) >> $GITHUB_OUTPUT
     - name: Fetch last base
       shell: bash
-      run: |
-        if (!git fetch origin tag ${{ inputs.base_tag }}); then
-          datadog_head=$(git ls-remote --refs origin refs/heads/datadog | awk '{ print $1 }')
-          git tag ${{ inputs.base_tag }} $(git merge-base $datadog_head ${{ steps.get_latest_tags.previous_tag }})
-        fi
+      run: git fetch origin tag ${{ inputs.base_tag }}
     - name: Fetch datadog branch
       shell: bash
       run: git fetch origin  ${{ inputs.datadog_branch }}
