@@ -71,22 +71,16 @@ runs:
       run: git push -f origin ${{ inputs.datadog_branch }}
     - name: Tag release
       shell: bash
-      run: git tag ${{ steps.get_latest_tag.outputs.tag }}-dd ${{ inputs.datadog_branch }}
+      run: git tag -f ${{ steps.get_latest_tag.outputs.tag }}-dd ${{ inputs.datadog_branch }}
     - name: Push tag
       shell: bash
-      run: git push origin ${{ steps.get_latest_tag.outputs.tag }}-dd
+      run: git push -f origin ${{ steps.get_latest_tag.outputs.tag }}-dd
     - name: Move last base tag
       shell: bash
       run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
     - name: Push last base tag
       shell: bash
-      run: git push origin ${{ steps.get_latest_tag.outputs.tag }}-dd
-    - name: Move last base tag
-      shell: bash
-      run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
-    - name: Push last base tag
-      shell: bash
-      run: git push -f origin ${{ inputs.base_tag }}
+      run: git push -f origin ${{ steps.get_latest_tag.outputs.tag }}-dd
 
 branding:
   icon: 'package'
