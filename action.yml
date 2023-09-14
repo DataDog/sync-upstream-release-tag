@@ -85,7 +85,7 @@ runs:
       run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
     - name: Push last base tag
       shell: bash
-      run: git push -f origin ${{ steps.get_latest_tag.outputs.tag }}-dd
+      run: git push -f origin ${{ inputs.base_tag }}
 
 branding:
   icon: 'package'
