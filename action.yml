@@ -26,6 +26,10 @@ inputs:
     description: Tag used to mark the base
     required: false
     default: last-dd-base
+  date_suffix:
+    description: Date format to append as suffix to the tag
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -59,6 +63,10 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run:  echo tag=$(gh release list -R ${{ inputs.upstream_repo }} --exclude-drafts --exclude-pre-releases -L 10 | grep -Eo "\bv[0-9]+\.[0-9]+\.[0-9]+\b\s" | sort -V | tail -n1) >> $GITHUB_OUTPUT
+    - name: Get dd tag
+      id: get_dd_tag
+      shell: bash
+      run: echo tag=${{ steps.get_latest_tag.outputs.tag }}-dd${${{ inputs.date_suffix }}:+.$(date +${{ inputs.date_suffix }})} >> $GITHUB_OUTPUT
     - name: Fetch last base
       shell: bash
       run: git fetch origin tag ${{ inputs.base_tag }}
@@ -76,10 +84,10 @@ runs:
       run: git push -f origin ${{ inputs.datadog_branch }}
     - name: Tag release
       shell: bash
-      run: git tag -f ${{ steps.get_latest_tag.outputs.tag }}-dd ${{ inputs.datadog_branch }}
+      run: git tag -f ${{ steps.get_dd_tag.outputs.tag }} ${{ inputs.datadog_branch }}
     - name: Push tag
       shell: bash
-      run: git push -f origin ${{ steps.get_latest_tag.outputs.tag }}-dd
+      run: git push -f origin ${{ steps.get_dd_tag.outputs.tag }}
     - name: Move last base tag
       shell: bash
       run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
