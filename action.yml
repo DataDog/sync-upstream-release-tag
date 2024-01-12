@@ -29,7 +29,7 @@ inputs:
   date_suffix:
     description: Date format to append as suffix to the tag
     required: false
-    default: ""
+    default: "%Y%V"
 
 runs:
   using: "composite"
