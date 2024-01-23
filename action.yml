@@ -62,7 +62,8 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      run:  echo tag=$(gh release list -R ${{ inputs.upstream_repo }} --exclude-drafts --exclude-pre-releases -L 10 | grep -Eo "\bv[0-9]+\.[0-9]+\.[0-9]+\b\s" | sort -V | tail -n1) >> $GITHUB_OUTPUT
+      # We consider that the tags following the semver format exactly are the tags from upstream
+      run: echo tag=$(git tag -l v\* | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | sort -V | tail -n1) >> $GITHUB_OUTPUT
     - name: Get dd tag
       id: get_dd_tag
       shell: bash
