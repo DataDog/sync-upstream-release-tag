@@ -34,6 +34,10 @@ inputs:
     description: Major version regex
     required: false
     default: "[0-9]+"
+  minor_version:
+    description: Minor version regex
+    required: false
+    default: "[0-9]+"
 
 runs:
   using: "composite"
@@ -67,7 +71,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       # We consider that the tags following the semver format exactly are the tags from upstream
-      run: echo tag=$(git tag -l v\* | grep -E "^v${{ inputs.major_version }}\.[0-9]+\.[0-9]+$" | sort -V | tail -n1) >> $GITHUB_OUTPUT
+      run: echo tag=$(git tag -l v\* | grep -E "^v${{ inputs.major_version }}\.${{ inputs.minor_version }}\.[0-9]+$" | sort -V | tail -n1) >> $GITHUB_OUTPUT
     - name: Get dd tag
       id: get_dd_tag
       shell: bash
