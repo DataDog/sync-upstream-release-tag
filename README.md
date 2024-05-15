@@ -2,7 +2,7 @@
 
 Action to automatically create tag in a forked repo for the latest upstream release
 
-# Usage
+## Usage
 
 1. Add a secret called `WORKFLOW_TOKEN` with write access to your repository
 2. Add this to a `.github/workflows/sync.yaml` file in your fork
@@ -25,10 +25,10 @@ jobs:
     - name: Create upstream version tag
       uses: DataDog/sync-upstream-release-tag@v0.1.0
         with:
-   github_actor: "${GITHUB_ACTOR}"
-   github_repository: "${GITHUB_REPOSITORY}"
-    # The token need to have write-all access on the repo for the rebase
-    # so we cannot use the action's default token
-   github_token: ${{ secrets.WORKFLOW_TOKEN }}
+          github_actor: "${GITHUB_ACTOR}"
+          github_repository: "${GITHUB_REPOSITORY}"
+          # The token need to have write-all access on the repo for the rebase
+          # so we cannot use the action's default token
+          github_token: ${{ secrets.WORKFLOW_TOKEN }}
           upstream_repo: kubernetes-sigs/gcp-compute-persistent-disk-csi-driver
 ```
