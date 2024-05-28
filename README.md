@@ -1,6 +1,9 @@
 # sync-upstream-release-tag
 
-Action to automatically create tag in a forked repo for the latest upstream release
+Action to automatically create tag in a forked repo for the latest upstream release.
+
+It relies on the presence of a `last-dd-base` tag in the branch to find your latest commit and rebase them on top of the latest commits from upstream. It tags the new branch with a new tag according to the schema below:
+![sync workflow](./sync%20workflow.png)
 
 ## Usage
 
