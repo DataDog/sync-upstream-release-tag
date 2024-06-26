@@ -9,7 +9,7 @@ It relies on the presence of a `last-dd-base` tag in the branch to find your lat
 
 1. Add a secret called `WORKFLOW_TOKEN` with write access to your repository. This must be a [personal github access token](https://github.com/settings/tokens) with at least the `repo` and `workflow` permissions (the scope to update the Github Actions is needed in case the upstream repo modifies its own actions):
    ![token_scope](./token%20scope.png)
-2. If your org enforce the use of SSO, you must [authorize your token](https://docs.github.com/en/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on)
+2. If your org enforces the use of SSO, you must [authorize your token](https://docs.github.com/en/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on)
 3. Add this to a `.github/workflows/sync.yaml` file in your fork
 
 ```yaml
