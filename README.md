@@ -7,7 +7,8 @@ It relies on the presence of a `last-dd-base` tag in the branch to find your lat
 
 ## Usage
 
-1. Add a secret called `WORKFLOW_TOKEN` with write access to your repository
+1. Add a secret called `WORKFLOW_TOKEN` with write access to your repository. This must be a github access token with at least the following permissions (the scope to update the Github Actions is needed in case the upstream repo modify its own actions):
+   ![token_scope](./token%20scope.png)
 2. Add this to a `.github/workflows/sync.yaml` file in your fork
 
 ```yaml
@@ -35,3 +36,5 @@ jobs:
           github_token: ${{ secrets.WORKFLOW_TOKEN }}
           upstream_repo: kubernetes-sigs/gcp-compute-persistent-disk-csi-driver
 ```
+
+Additional configuration flags are available if needed. Check the [action](./action.yml) directly to see them.
