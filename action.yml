@@ -31,13 +31,30 @@ inputs:
     required: false
     default: "%Y%V"
   major_version:
-    description: Major version regex
+    description: >
+      Major version regex
+
+      Used in the default version tags regex. Use inputs.version_regex
+      if you want more control over the whole pattern.
     required: false
     default: "[0-9]+"
   minor_version:
-    description: Minor version regex
+    description: >
+      Minor version regex
+
+      Used in the default version tags regex. Use inputs.version_regex
+      if you want more control over the whole pattern.
     required: false
     default: "[0-9]+"
+  version_regex:
+    description: >
+      Regex used to match release version tags.
+
+      Backslash characters need to be escaped.
+      Use this if the default regex provided by this action in combination
+      with inputs.major_version and inputs.minor_version is not enough.
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -45,6 +62,18 @@ runs:
     - uses: actions/checkout@v4
       with:
         token: ${{ inputs.github_token }}
+    - name: Craft version tags regex pattern
+      id: set_version_regex
+      shell: bash
+      run: |
+        # test whether a version_regex was passed in inputs
+        if [[ "${{ inputs.version_regex }}" ]]
+        then
+          echo regex="${{ inputs.version_regex }}" >> $GITHUB_OUTPUT
+        else
+          # This default regex matches semver tags with an optional 'v' prefix. 
+          echo regex="^(v)?${{ inputs.major_version }}\.${{ inputs.minor_version }}\.[0-9]+$" >> $GITHUB_OUTPUT
+        fi
     - name: Setup git config
       shell: bash
       env:
@@ -70,9 +99,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      # We consider that the tags following the semver format exactly are the tags from upstream
-      # Tag can contain a v prefix or not so we need to handle both cases
-      run: echo tag=$(git tag -l | grep -E "^(v)?${{ inputs.major_version }}\.${{ inputs.minor_version }}\.[0-9]+$" | sort -V | tail -n1) >> $GITHUB_OUTPUT
+      run: echo tag=$(git tag -l | grep -E "${{ steps.set_version_regex.outputs.regex }}" | sort -V | tail -n1) >> $GITHUB_OUTPUT
     - name: Get dd tag
       id: get_dd_tag
       shell: bash
