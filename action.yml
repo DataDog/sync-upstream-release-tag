@@ -31,15 +31,28 @@ inputs:
     required: false
     default: "%Y%V"
   major_version:
-    description: Major version regex
+    description: >
+      Major version regex
+
+      Used in the default version tags regex. Use inputs.version_regex
+      if you want more control over the whole pattern.
     required: false
     default: "[0-9]+"
   minor_version:
-    description: Minor version regex
+    description: >
+      Minor version regex
+
+      Used in the default version tags regex. Use inputs.version_regex
+      if you want more control over the whole pattern.
     required: false
     default: "[0-9]+"
   version_regex:
-    description: Regex used to match release version tags
+    description: >
+      Regex used to match release version tags.
+
+      Backslash characters need to be escaped.
+      Use this if the default regex provided by this action in combination
+      with inputs.major_version and inputs.minor_version is not enough.
     required: false
     default: ""
 
