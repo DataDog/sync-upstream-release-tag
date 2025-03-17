@@ -71,7 +71,7 @@ runs:
         then
           echo regex="${{ inputs.version_regex }}" >> $GITHUB_OUTPUT
         else
-          # This default regex matches semver tags with an optional 'v' prefix. 
+          # This default regex matches semver tags with an optional 'v' prefix.
           echo regex="^(v)?${{ inputs.major_version }}\.${{ inputs.minor_version }}\.[0-9]+$" >> $GITHUB_OUTPUT
         fi
     - name: Setup git config
@@ -109,31 +109,49 @@ runs:
           DATE_SUFFIX=".$(date +$DATE_SUFFIX)"
         fi
         echo "tag=${{ steps.get_latest_tag.outputs.tag }}-dd$DATE_SUFFIX" >> $GITHUB_OUTPUT
+    - name: Check if dd tag already exists
+      id: check_dd_tag
+      shell: bash
+      run: git fetch origin tag ${{ steps.get_dd_tag.outputs.tag }}
+      continue-on-error: true
+    - name: Exit if dd_tag already exists
+      if: steps.check_dd_tag.outcome == 'success'
+      shell: bash
+      run: echo "Tag already exists, nothing to do"
     - name: Fetch last base
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git fetch origin tag ${{ inputs.base_tag }}
     - name: Fetch datadog branch
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git fetch origin  ${{ inputs.datadog_branch }}
     - name: Checkout datadog branch
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git checkout ${{ inputs.datadog_branch }}
     - name: Rebase datadog branch
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git rebase --onto ${{ steps.get_latest_tag.outputs.tag }} ${{ inputs.base_tag }}
     - name: Push datadog branch
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git push -f origin ${{ inputs.datadog_branch }}
     - name: Tag release
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git tag -f ${{ steps.get_dd_tag.outputs.tag }} ${{ inputs.datadog_branch }}
     - name: Push tag
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git push -f origin ${{ steps.get_dd_tag.outputs.tag }}
     - name: Move last base tag
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git tag -f ${{ inputs.base_tag }} ${{ steps.get_latest_tag.outputs.tag }}
     - name: Push last base tag
+      if: steps.check_dd_tag.outcome == 'failure'
       shell: bash
       run: git push -f origin ${{ inputs.base_tag }}
 
